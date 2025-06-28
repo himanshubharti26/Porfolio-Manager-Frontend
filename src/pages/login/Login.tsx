@@ -1,36 +1,45 @@
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { login } from "../../redux/slices/authSlice";
+import { loginUser } from "../../redux/slices/authSlice";
+import styles from "./Login.module.css";
+import { useState } from "react";
 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const onFinish = (values: { email: string; password: string }) => {
-    // Simulate a login API call
-    const user = { id: "1", name: "John Doe", email: values.email };
-    const token = "fake-jwt-token";
-
-    // Dispatch the login action
-    dispatch(login({ user, token }));
-
-    // Redirect to the dashboard
-    navigate("/dashboard");
+  const onFinish = async () => {
+    setLoading(true);
+    try {
+      const resultAction = await dispatch<any>(loginUser({ email, password }));
+      if (loginUser.fulfilled.match(resultAction)) {
+        navigate("/dashboard");
+      } else {
+        message.error(resultAction.payload || "Login failed");
+      }
+    } catch (error) {
+      message.error("Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="login-container">
+    <div className={styles["login-container"]}>
       <h2>Login</h2>
       <Form onFinish={onFinish} layout="vertical">
         <Form.Item name="email" label="Email" rules={[{ required: true, type: "email" }]}>
-          <Input />
+          <Input value={email} onChange={e => setEmail(e.target.value)} />
         </Form.Item>
         <Form.Item name="password" label="Password" rules={[{ required: true }]}>
-          <Input.Password />
+          <Input.Password value={password} onChange={e => setPassword(e.target.value)} />
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit" loading={loading}>
             Login
           </Button>
         </Form.Item>

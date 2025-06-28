@@ -1,28 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '../../redux/store';
+import { fetchStocks } from '../../redux/slices/stockSlice';
 import styles from './StockList.module.css';
 
-// Mock stock data
-type Stock = {
-  name: string;
-  value: number;
-};
-
-const mockStocks: Stock[] = [
-  { name: 'Apple', value: 195 },
-  { name: 'Microsoft', value: 340 },
-  { name: 'Tesla', value: 250 },
-  { name: 'Amazon', value: 130 },
-  { name: 'Google', value: 2800 },
-];
-
 const StockList: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const [search, setSearch] = useState('');
+  const { stocks, isLoading, error } = useSelector((state: RootState) => state.stock);
 
-  const filteredStocks = mockStocks.filter(
-    (stock) =>
-      stock.name.toLowerCase().includes(search.toLowerCase()) ||
-      stock.value.toString().includes(search)
-  );
+  useEffect(() => {
+    dispatch(fetchStocks({ search }));
+  }, [dispatch, search]);
 
   return (
     <div className={styles.container}>
@@ -34,22 +23,28 @@ const StockList: React.FC = () => {
         onChange={(e) => setSearch(e.target.value)}
         className={styles.searchInput}
       />
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredStocks.map((stock) => (
-            <tr key={stock.name}>
-              <td>{stock.name}</td>
-              <td>{stock.value}</td>
+      {isLoading ? (
+        <div>Loading...</div>
+      ) : error ? (
+        <div style={{ color: 'red' }}>{error}</div>
+      ) : (
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Value</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {stocks.map((stock: any) => (
+              <tr key={stock._id || stock.securityName}>
+                <td>{stock.securityName}</td>
+                <td>{stock.value}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };

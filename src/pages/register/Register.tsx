@@ -23,7 +23,10 @@ const Register = () => {
     <div className="register-container">
       <h2>Register</h2>
       <Form onFinish={onFinish} layout="vertical">
-        <Form.Item name="name" label="Name" rules={[{ required: true }]}>
+        <Form.Item name="firstName" label="firstName" rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
+        <Form.Item name="lastName" label="lastName" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
         <Form.Item name="email" label="Email" rules={[{ required: true, type: "email" }]}>
