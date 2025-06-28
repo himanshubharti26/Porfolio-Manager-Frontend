@@ -29,7 +29,12 @@ export const fetchStocks = createAsyncThunk(
       if (payload.search) {
         url += `?search=${encodeURIComponent(payload.search)}`;
       }
-      const response = await fetch(url);
+      const token = localStorage.getItem("token");
+      const response = await fetch(url, {
+        headers: {
+          "Authorization": token ? `Bearer ${token}` : "",
+        },
+      });
       const data = await response.json();
       if (!response.ok) {
         return rejectWithValue(data.message || "Failed to fetch stocks");
@@ -45,7 +50,12 @@ export const fetchStockById = createAsyncThunk(
   "stock/fetchStockById",
   async (securityId: string, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${environment.apiUrl}securities/${securityId}`);
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${environment.apiUrl}securities/${securityId}`, {
+        headers: {
+          "Authorization": token ? `Bearer ${token}` : "",
+        },
+      });
       const data = await response.json();
       if (!response.ok) {
         return rejectWithValue(data.message || "Failed to fetch stock");
@@ -61,9 +71,13 @@ export const createStock = createAsyncThunk(
   "stock/createStock",
   async (payload: { securityName: string; value: number }, { rejectWithValue }) => {
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(`${environment.apiUrl}securities`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": token ? `Bearer ${token}` : "",
+        },
         body: JSON.stringify(payload),
       });
       const data = await response.json();
@@ -81,9 +95,13 @@ export const updateStock = createAsyncThunk(
   "stock/updateStock",
   async (payload: { securityId: string; securityName: string; value: number }, { rejectWithValue }) => {
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(`${environment.apiUrl}securities`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": token ? `Bearer ${token}` : "",
+        },
         body: JSON.stringify(payload),
       });
       const data = await response.json();
