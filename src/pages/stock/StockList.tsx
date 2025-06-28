@@ -4,14 +4,24 @@ import { RootState, AppDispatch } from '../../redux/store';
 import { fetchStocks } from '../../redux/slices/stockSlice';
 import styles from './StockList.module.css';
 
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
+
 const StockList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 400);
   const { stocks, isLoading, error } = useSelector((state: RootState) => state.stock);
 
   useEffect(() => {
-    dispatch(fetchStocks({ search }));
-  }, [dispatch, search]);
+    dispatch(fetchStocks({ search: debouncedSearch }));
+  }, [dispatch, debouncedSearch]);
 
   return (
     <div className={styles.container}>
